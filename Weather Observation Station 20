@@ -1,0 +1,28 @@
+SELECT 
+CASE
+    WHEN (COUNT(*) % 2 = 0) 
+    THEN ( SELECT ROUND(
+                ((SELECT l FROM (
+                            SELECT ROW_NUMBER() OVER(ORDER BY lat_n) as n, lat_n as l
+                            FROM STATION
+                            ) INDEXED_LAT
+                 WHERE n = (SELECT COUNT(*) / 2 FROM STATION)
+                ) + 
+                (SELECT l FROM (
+                            SELECT ROW_NUMBER() OVER(ORDER BY lat_n) as n, lat_n as l
+                            FROM STATION
+                            ) INDEXED_LAT
+                 WHERE n = (SELECT (COUNT(*) / 2) + 1 FROM STATION)
+                ))
+             / 2, 4)
+        )
+    ELSE ( SELECT ROUND(
+                (SELECT l FROM (
+                            SELECT ROW_NUMBER() OVER(ORDER BY lat_n) as n, lat_n as l
+                            FROM STATION
+                            ) INDEXED_LAT
+                 WHERE n = (SELECT ROUND(COUNT(*) / 2) FROM STATION)
+                ), 4)
+          )
+END
+FROM STATION;
